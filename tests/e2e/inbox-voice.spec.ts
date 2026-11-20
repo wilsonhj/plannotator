@@ -128,7 +128,8 @@ async function startWorld(options: { version?: string; config?: Record<string, u
   const started = JSON.parse(first) as { url: string; threads: string[]; filed: World['filed']; filedToo: World['filedToo'] };
   const read = (name: string) => {
     const path = join(root, name);
-    return existsSync(path) ? readFileSync(path, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)) : [];
+    // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+    return existsSync(path) ? readFileSync(path, 'utf8').split('\n').slice(0, -1).filter(Boolean).map((line) => JSON.parse(line)) : [];
   };
   const world: World = {
     root,

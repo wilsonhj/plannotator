@@ -288,6 +288,8 @@ export function createFakeAgents(prefix = "plannotator-agents-"): FakeAgents {
       if (!existsSync(log)) return [];
       return readFileSync(log, "utf8")
         .split("\n")
+        // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+        .slice(0, -1)
         .filter(Boolean)
         .map((line) => JSON.parse(line) as { name: string; args: string[] });
     },

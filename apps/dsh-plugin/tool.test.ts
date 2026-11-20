@@ -64,7 +64,8 @@ interface FakeCall {
 
 function readCalls(logDir: string): FakeCall[] {
   const path = join(logDir, "calls.jsonl");
-  return existsSync(path) ? readFileSync(path, "utf8").trim().split("\n").map((line) => JSON.parse(line) as FakeCall) : [];
+  // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+  return existsSync(path) ? readFileSync(path, "utf8").split("\n").slice(0, -1).filter(Boolean).map((line) => JSON.parse(line) as FakeCall) : [];
 }
 
 function alive(pid: number): boolean {

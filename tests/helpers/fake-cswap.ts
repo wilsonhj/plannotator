@@ -111,13 +111,15 @@ export function removeFakeCswap(dir: string): void {
 /** Each run's arguments, oldest first. */
 export function fakeCswapCalls(dir: string): string[] {
   const file = join(dir, 'calls.log');
-  return existsSync(file) ? readFileSync(file, 'utf8').split('\n').filter(Boolean) : [];
+  // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+  return existsSync(file) ? readFileSync(file, 'utf8').split('\n').slice(0, -1).filter(Boolean) : [];
 }
 
 /** Each run's start and end, `start <args>` or `end <args>`, in the order they happened. */
 export function fakeCswapEvents(dir: string): string[] {
   const file = join(dir, 'events.log');
-  return existsSync(file) ? readFileSync(file, 'utf8').split('\n').filter(Boolean) : [];
+  // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+  return existsSync(file) ? readFileSync(file, 'utf8').split('\n').slice(0, -1).filter(Boolean) : [];
 }
 
 const count = (file: string) => (existsSync(file) ? readFileSync(file, 'utf8').length : 0);

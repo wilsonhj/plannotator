@@ -187,14 +187,15 @@ else if (args[0] === "thread" && args[1] === "send") {
   const launcher = join(dir, "bin", "t3");
   writeFileSync(launcher, `#!/bin/sh\nexec '${process.execPath}' '${script}' "$@"\n`);
   chmodSync(launcher, 0o755);
-  const calls = () => (existsSync(log) ? readFileSync(log, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as string[]) : []);
+  // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+  const calls = () => (existsSync(log) ? readFileSync(log, "utf8").split("\n").slice(0, -1).filter(Boolean).map((line) => JSON.parse(line) as string[]) : []);
   return {
     dir,
     launcher,
     calls,
     sends: () => calls().filter((args) => args[0] === "thread" && args[1] === "send"),
-    turns: () => (existsSync(turnsLog) ? readFileSync(turnsLog, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as [string, string]) : []),
-    envs: () => (existsSync(envLog) ? readFileSync(envLog, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as Record<string, string>) : []),
+    turns: () => (existsSync(turnsLog) ? readFileSync(turnsLog, "utf8").split("\n").slice(0, -1).filter(Boolean).map((line) => JSON.parse(line) as [string, string]) : []),
+    envs: () => (existsSync(envLog) ? readFileSync(envLog, "utf8").split("\n").slice(0, -1).filter(Boolean).map((line) => JSON.parse(line) as Record<string, string>) : []),
     setState,
   };
 }

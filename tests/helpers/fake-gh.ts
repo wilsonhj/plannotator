@@ -108,8 +108,9 @@ export function makeFakeGh(scenario: FakeGhScenario): FakeGh {
       FAKE_GH_SCENARIO: scenarioFile,
       FAKE_GH_LOG: log,
     },
+    // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
     calls: () =>
-      readFileSync(log, "utf-8").split("\n").filter(Boolean).map((l) => JSON.parse(l) as FakeGhCall),
+      readFileSync(log, "utf-8").split("\n").slice(0, -1).filter(Boolean).map((l) => JSON.parse(l) as FakeGhCall),
     cleanup: () => rmSync(root, { recursive: true, force: true }),
   };
 }

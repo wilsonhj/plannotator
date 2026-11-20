@@ -230,7 +230,8 @@ export function installFakeClaude(input: { bin: string; state: string; config?: 
     },
     logins() {
       const file = join(state, "logins.log");
-      return existsSync(file) ? readFileSync(file, "utf8").split("\n").filter(Boolean).length : 0;
+      // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+      return existsSync(file) ? readFileSync(file, "utf8").split("\n").slice(0, -1).filter(Boolean).length : 0;
     },
     setLoginExports(vars) {
       const file = join(state, "login-exports.sh");
@@ -242,7 +243,8 @@ export function installFakeClaude(input: { bin: string; state: string; config?: 
     wakes: () => lines<ReturnType<FakeClaude["wakes"]>[number]>(join(state, "wakes.jsonl")),
     delivered() {
       const file = join(state, "delivered.log");
-      return existsSync(file) ? readFileSync(file, "utf8").split("\n").filter(Boolean) : [];
+      // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+      return existsSync(file) ? readFileSync(file, "utf8").split("\n").slice(0, -1).filter(Boolean) : [];
     },
     setInstalled(on) {
       if (on) install();
@@ -252,7 +254,8 @@ export function installFakeClaude(input: { bin: string; state: string; config?: 
       let stopped = 0;
       const pidsOf = (name: string) => {
         const file = join(state, name);
-        return existsSync(file) ? [...new Set(readFileSync(file, "utf8").split("\n").filter(Boolean).map(Number))] : [];
+        // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+        return existsSync(file) ? [...new Set(readFileSync(file, "utf8").split("\n").slice(0, -1).filter(Boolean).map(Number))] : [];
       };
       const candidates = [...pidsOf("pids.log").map((pid) => ({ pid, hook: false })), ...pidsOf("hookpids.log").map((pid) => ({ pid, hook: true }))];
       for (const { pid, hook } of candidates) {

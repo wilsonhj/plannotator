@@ -161,7 +161,8 @@ export function installFakePi(input: { bin: string; state: string; home: string;
     calls: () => lines<FakePiCall>("calls.jsonl"),
     starts: () => lines<FakePiCall>("calls.jsonl").filter((c) => c.argv.includes("--mode")),
     terminals: () => lines<FakePiCall>("calls.jsonl").filter((c) => c.argv.includes("--session-id") && !c.argv.includes("--mode")),
-    delivered: () => (existsSync(join(state, "delivered.log")) ? readFileSync(join(state, "delivered.log"), "utf8").split("\n").filter(Boolean) : []),
+    // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+    delivered: () => (existsSync(join(state, "delivered.log")) ? readFileSync(join(state, "delivered.log"), "utf8").split("\n").slice(0, -1).filter(Boolean) : []),
     dialogs: () => lines("dialogs.jsonl"),
     exits: () => lines("exits.jsonl"),
     osascript() {
@@ -193,7 +194,8 @@ export function installFakePi(input: { bin: string; state: string; home: string;
     stopAll() {
       let stopped = 0;
       const file = join(state, "pids.log");
-      const pids = existsSync(file) ? [...new Set(readFileSync(file, "utf8").split("\n").filter(Boolean).map(Number))] : [];
+      // A line is whole only once its newline is written: the last piece is "" or a line still being appended.
+      const pids = existsSync(file) ? [...new Set(readFileSync(file, "utf8").split("\n").slice(0, -1).filter(Boolean).map(Number))] : [];
       for (const pid of pids) {
         if (!alive(pid)) continue;
         try {
